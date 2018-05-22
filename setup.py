@@ -23,7 +23,9 @@ from setuptools import setup
 COMPILE_ARGS = ["-std=c++11",
                 "-Wno-unused-function",
                 "-Wno-unused-local-typedef",
-                "-funsigned-char"]
+                "-funsigned-char",
+                "-O3",
+                "-march=native"]
 
 pywrapfst = Extension(name="pywrapfst", language="c++",
                       extra_compile_args=COMPILE_ARGS,

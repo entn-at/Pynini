@@ -1979,7 +1979,7 @@ cdef class MPdtParentheses(object):
       FstIOError: Write failed.
     """
     if not WriteLabelTriples[int64](tostring(filename), self._parens,
-                                    self._assign):
+                                    <const vector[int64]>self._assign):
       raise FstIOError("Write failed: {!r}".format(filename))
 
 

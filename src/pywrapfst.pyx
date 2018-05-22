@@ -370,7 +370,7 @@ cdef class Weight(object):
                                              id(self))
 
   def __str__(self):
-    return self.to_string()
+    return self.to_string().decode('utf8', errors='ignore')
 
   # This attempts to convert the string form into a float, raising
   # ValueError when that is not appropriate.
@@ -1407,7 +1407,7 @@ cdef class _Fst(object):
         "Cannot construct {}".format(self.__class__.__name__))
 
   def __str__(self):
-    return self.text()
+    return self.text().decode('utf8', errors='ignore')
 
   # Registers the class for pickling; must be repeated in any subclass which
   # can't be derived by _init_XFst.
@@ -1766,7 +1766,7 @@ cdef class _Fst(object):
     See also: `read_from_string`.
     """
     cdef stringstream sstrm
-    if not self._fst.get().Write(sstrm, "write_to_string"):
+    if not self._fst.get().Write(sstrm, b"write_to_string"):
       raise FstIOError("Write to string failed")
     return sstrm.str()
 
