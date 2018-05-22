@@ -154,6 +154,36 @@ from pynini_includes cimport GetPdtParserType
 from pynini_includes cimport PdtParserType
 
 
+# Custom extensions of Pynini
+
+from custom_ops cimport WildcardCompose
+
+cpdef _MutableFst wildcard_compose(_Fst ifst1,
+                                   _Fst ifst2,
+                                   int wildcard):
+  """
+  wildcard_compose(ifst1, ifst2, wildcard)
+
+  Constructively composes two FSTs. 
+  
+  Differs from `compose` by allowing wildcards: arcs which are entered
+  when no other arcs are matched.  
+
+  Args:
+    ifst1: The first input FST.
+    ifst2: The second input FST.
+    wildcard: The integer ID of the wildcard arc.
+
+  Returns:
+    An FST.
+
+  See also: `compose`.
+  """
+  cdef unique_ptr[VectorFstClass] tfst
+  tfst.reset(new VectorFstClass(ifst1.arc_type()))
+  WildcardCompose(deref(ifst1._fst), deref(ifst2._fst), tfst.get(), wildcard)
+  return _init_MutableFst(tfst.release())
+
 # Python imports needed for implementation.
 
 
@@ -1134,7 +1164,7 @@ cpdef bool matches(ifst1, ifst2, compose_filter=b"auto"):
   matches(ifst1, ifst2, compose_filter="auto")
 
   Returns whether or not two FSTs "match" (have a non-empty composition).
-
+compose
   This operation computes the composition of two FSTs, connects the result,
   and then returns True iff the composition is non-empty (has a valid start
   state); the resulting composition is then discarded. Normally the first
@@ -1372,6 +1402,8 @@ def _compose_patch(fnc):
 
 
 compose = _compose_patch(pywrapfst.compose)
+
+wildcard_compose = _compose_patch(wildcard_compose)
 
 
 def _difference_patch(fnc):

@@ -1,12 +1,9 @@
-AUTHORS
-CHEATSHEET
-CONTRIBUTING
 LICENSE
 MANIFEST.in
-NEWS
 README.rst
 pynini.pdf
 pynini_test.py
+setup.cfg
 setup.py
 pynini.egg-info/PKG-INFO
 pynini.egg-info/SOURCES.txt
@@ -17,6 +14,7 @@ src/cdrewrite.h
 src/crossproduct.h
 src/crossproductscript.cc
 src/crossproductscript.h
+src/custom_ops.pxd
 src/fst.pxd
 src/fst_util.pxd
 src/getters.cc
@@ -69,4 +67,6 @@ src/stringprintscript.h
 src/stringtokentype.cc
 src/stringtokentype.h
 src/stripcomment.h
+src/wildcardcompose.h
+src/wildcardcomposescript.h
 testdata/str.map
