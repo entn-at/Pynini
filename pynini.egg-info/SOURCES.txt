@@ -68,5 +68,6 @@ src/stringtokentype.cc
 src/stringtokentype.h
 src/stripcomment.h
 src/wildcardcompose.h
+src/wildcardcomposescript.cc
 src/wildcardcomposescript.h
 testdata/str.map

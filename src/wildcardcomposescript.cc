@@ -8,8 +8,8 @@ namespace script {
 void WildcardCompose(const FstClass &fst1, const FstClass &fst2,
                      MutableFstClass *ofst, const int wildcard){
 
-  if (!internal::ArcTypesMatch(ifst1, ifst2, "WildcardCompose") ||
-      !internal::ArcTypesMatch(ifst2, *ofst, "WildcardCompose")) {
+  if (!internal::ArcTypesMatch(fst1, fst2, "WildcardCompose") ||
+      !internal::ArcTypesMatch(fst2, *ofst, "WildcardCompose")) {
     ofst->SetProperties(kError, kError);
     return;
   }
