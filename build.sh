@@ -27,6 +27,8 @@ git pull
 make -j
 popd
 
+popd
+
 pip install -r requirements.txt
 CPATH="${OPENFST_DIR}/src/include:${RE2_DIR}" \
 LIBRARY_PATH="${OPENFST_DIR}/lib:${RE2_DIR}/obj/so" \
