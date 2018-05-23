@@ -31,8 +31,7 @@ pywrapfst = Extension(name="pywrapfst", language="c++",
                       extra_compile_args=COMPILE_ARGS,
                       libraries=["fstfarscript", "fstfar", "fstscript",
                                  "fst", "m", "dl"],
-                      sources=["src/pywrapfst.cc"],
-                      rpath=['./lib'])
+                      sources=["src/pywrapfst.cc"])
 
 pynini = Extension(name="pynini", language="c++",
                    extra_compile_args=COMPILE_ARGS,
@@ -63,8 +62,7 @@ pynini = Extension(name="pynini", language="c++",
                             "src/lenientlycomposescript.cc",
                             "src/gtl.cc",
                             "src/getters.cc",
-                            "src/crossproductscript.cc"],
-                   rpath=['./lib'])
+                            "src/crossproductscript.cc"])
 
 setup(
     name="pynini",
