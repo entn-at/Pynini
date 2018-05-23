@@ -31,7 +31,8 @@ pywrapfst = Extension(name="pywrapfst", language="c++",
                       extra_compile_args=COMPILE_ARGS,
                       libraries=["fstfarscript", "fstfar", "fstscript",
                                  "fst", "m", "dl"],
-                      sources=["src/pywrapfst.cc"])
+                      sources=["src/pywrapfst.cc"],
+                      rpath=['./lib'])
 
 pynini = Extension(name="pynini", language="c++",
                    extra_compile_args=COMPILE_ARGS,
@@ -62,7 +63,8 @@ pynini = Extension(name="pynini", language="c++",
                             "src/lenientlycomposescript.cc",
                             "src/gtl.cc",
                             "src/getters.cc",
-                            "src/crossproductscript.cc"])
+                            "src/crossproductscript.cc"],
+                   rpath=['./lib'])
 
 setup(
     name="pynini",
@@ -75,7 +77,7 @@ setup(
         "natural language processing", "speech recognition", "machine learning"
     ],
     classifiers=[
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.6",
         "Development Status :: 5 - Production/Stable",
         "Environment :: Other Environment", "Environment :: Console",
         "Intended Audience :: Developers",
@@ -87,4 +89,7 @@ setup(
         "Topic :: Scientific/Engineering :: Mathematics"
     ],
     ext_modules=[pywrapfst, pynini],
+    packages=[''],
+    package_dir={'': '.'},
+    package_data={'': ['lib/libre2.so.0', 'lib/libfstfarscript.so.0', 'lib/libfstpdtscript.so.0', 'lib/libfstmpdtscript.so.0', 'lib/libfstscript.so.0', 'lib/libfstfar.so.0', 'lib/libfst.so.0']},
     test_suite="pynini_test")
