@@ -160,7 +160,8 @@ from custom_ops cimport WildcardCompose
 
 cpdef _MutableFst wildcard_compose(_Fst ifst1,
                                    _Fst ifst2,
-                                   int wildcard):
+                                   int wildcard,
+                                   float prune_threshold = 0):
   """
   wildcard_compose(ifst1, ifst2, wildcard)
 
@@ -173,6 +174,7 @@ cpdef _MutableFst wildcard_compose(_Fst ifst1,
     ifst1: The first input FST.
     ifst2: The second input FST.
     wildcard: The integer ID of the wildcard arc.
+    prune_threshold: Float threshold for pruning - if 0, no pruning is applied.
 
   Returns:
     An FST.
@@ -181,7 +183,7 @@ cpdef _MutableFst wildcard_compose(_Fst ifst1,
   """
   cdef unique_ptr[VectorFstClass] tfst
   tfst.reset(new VectorFstClass(ifst1.arc_type()))
-  WildcardCompose(deref(ifst1._fst), deref(ifst2._fst), tfst.get(), wildcard)
+  WildcardCompose(deref(ifst1._fst), deref(ifst2._fst), tfst.get(), wildcard, prune_threshold)
   return _init_MutableFst(tfst.release())
 
 # Python imports needed for implementation.

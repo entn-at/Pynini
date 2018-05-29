@@ -5,4 +5,4 @@ cdef extern from "wildcardcomposescript.h" \
     namespace "fst::script" nogil:
 
     void WildcardCompose(const FstClass &, const FstClass &,
-                         MutableFstClass *, const int wildcard)
+                         MutableFstClass *, const int wildcard, float prune_threshold)
