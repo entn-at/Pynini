@@ -58,7 +58,7 @@ popd
 
 # Move all dependent *.so to one location
 cp -P ${OPENFST_INSTALL}/lib/*.so* "${SHARED_OBJECTS_DIR}/"
-cp -P ${RE2_INSTALL}/obj/so/*.so* "${SHARED_OBJECTS_DIR}/"
+cp -P ${RE2_INSTALL}/lib/*.so* "${SHARED_OBJECTS_DIR}/"
 
 # Build and install pynini
 pip install -r requirements.txt
