@@ -5,6 +5,13 @@ if [[ "$(python --version)" != "Python 3.6"* ]]; then
     exit 1
 fi
 
+which cmake &>/dev/null
+HAS_CMAKE=$?
+if [ ${HAS_CMAKE} -ne 0 ]; then
+    echo "ERROR: CMake required"
+    exit 1
+fi
+
 # All dependent libs will reside here
 SHARED_OBJECTS_DIR="$(pwd)/lib"
 mkdir "${SHARED_OBJECTS_DIR}"
@@ -35,7 +42,7 @@ pushd deps
     if [ ! -f re2/.compiled ]; then
       git clone http://github.com/google/re2
       pushd re2
-          git checkout 2018-03-01
+         git checkout 2018-03-01
           git pull
           mkdir -p build
           pushd build
