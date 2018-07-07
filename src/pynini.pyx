@@ -38,6 +38,7 @@ from libcpp cimport bool
 from libcpp.cast cimport static_cast
 from libcpp.memory cimport shared_ptr
 from libcpp.memory cimport unique_ptr
+from libcpp.unordered_map cimport unordered_map
 from libcpp.utility cimport pair
 from libcpp.vector cimport vector
 
@@ -161,7 +162,9 @@ from custom_ops cimport WildcardCompose
 cpdef _MutableFst wildcard_compose(_Fst ifst1,
                                    _Fst ifst2,
                                    int wildcard,
-                                   float prune_threshold = 0):
+                                   int end_of_annotation,
+                                   dict slop_map = None
+                                   ):
   """
   wildcard_compose(ifst1, ifst2, wildcard)
 
@@ -173,8 +176,10 @@ cpdef _MutableFst wildcard_compose(_Fst ifst1,
   Args:
     ifst1: The first input FST.
     ifst2: The second input FST.
-    wildcard: The integer ID of the wildcard arc.
-    prune_threshold: Float threshold for pruning - if 0, no pruning is applied.
+    wildcard: The integer ID of the wildcard appearing as ifst1 ilabels.
+    end_of_annotation: The integer ID of the "end of annotation" symbols appearing as ifst2 olabels.
+    slop_map: An optional dict mapping olabels in ifst2 to permittable slop values.
+        Slop determines how many wildcards are allowed in composition to allow a match.
 
   Returns:
     An FST.
@@ -183,7 +188,8 @@ cpdef _MutableFst wildcard_compose(_Fst ifst1,
   """
   cdef unique_ptr[VectorFstClass] tfst
   tfst.reset(new VectorFstClass(ifst1.arc_type()))
-  WildcardCompose(deref(ifst1._fst), deref(ifst2._fst), tfst.get(), wildcard, prune_threshold)
+  cdef unordered_map[int, int] cpp_slop_map = slop_map
+  WildcardCompose(deref(ifst1._fst), deref(ifst2._fst), tfst.get(), wildcard, cpp_slop_map, end_of_annotation)
   return _init_MutableFst(tfst.release())
 
 # Python imports needed for implementation.
