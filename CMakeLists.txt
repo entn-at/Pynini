@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-function -Wno-unused-local-t
 add_executable(special_compose
 	src/special_compose.cc
 	src/wildcardcompose.h
-	)
+	src/special_arcs.cc)
 target_include_directories(special_compose PRIVATE
 	${OPENFST_ROOT}/include
 	${RE2_ROOT}/include

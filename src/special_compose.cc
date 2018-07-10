@@ -14,14 +14,15 @@ template<typename FstType> void print(const FstType *const fst, ostream &out = c
 
 int main(const int argc, const char *const *const argv) {
 
-  if (argc != 4) {
-    cout << "Usage: fst_find_intents <lattice-fst> <annotation-fst> <word-symbol-table>\n";
-    exit(0);
+  if (argc < 4) {
+    cout << "Usage: fst_find_intents <lattice-fst> <annotation-fst> <word-symbol-table> [<prune_threshold>]\n";
+    exit(1);
   }
 
   const auto lattice_path = argv[1];
   const auto annotation_path = argv[2];
   const auto word_symbol_table_path = argv[3];
+  const auto prune_threshold = argc > 4 ? stof(argv[4]) : 0.f;
 
   // Read and prepare lattice
   auto lattice = dynamic_cast<MutableFst<StdArc> *>(StdFst::Read(lattice_path));
@@ -38,11 +39,9 @@ int main(const int argc, const char *const *const argv) {
 
   // Prepare special matchers for composition
   StdVectorFst composed;
-  WildcardCompose(*lattice, *annotator, &composed, wildcard);
-  RmEpsilon(&composed);
+  WildcardCompose(*lattice, *annotator, &composed, wildcard, prune_threshold);
 
   // Compose
-  cout << "wildcard composed:\n";
   print(&composed);
 
   ofstream wildcard_out_file{"wildcard_composed.txt"};

@@ -7,24 +7,20 @@
 #include <fst/map.h>
 #include <fst/matcher.h>
 #include <fst/prune.h>
+#include <fst/fstlib.h>
 
 namespace fst {
 
-template <class Arc>
-void WildcardCompose(
+template<class Arc> void WildcardCompose(
   const Fst<Arc> &fst1,
   const Fst<Arc> &fst2,
   MutableFst<Arc> *ofst,
   const int wildcard,
-  const float prune_threshold = 0.0f);
+  const float prune_threshold = 0.0f
+);
 
-
-template <class Arc>
-void WildcardComposeNonPruned(
-  const Fst<Arc> &fst1,
-  const Fst<Arc> &fst2,
-  MutableFst<Arc> *ofst,
-  const int wildcard
+template<class Arc> void WildcardComposeNonPruned(
+  const Fst<Arc> &fst1, const Fst<Arc> &fst2, MutableFst<Arc> *ofst, const int wildcard
 ) {
   using WildcardMatcher = SigmaMatcher<SortedMatcher<Fst<Arc>>>;
 
@@ -46,65 +42,58 @@ using PrunedWildcardFst = Fst<PrunedWildcardArc>;
 
 struct LatticeConverter {
   PrunedWildcardWeight operator()(const TropicalWeight &weight_in) const {
-    return {TropicalWeight::One(), weight_in};
+    return {weight_in == TropicalWeight::Zero() ? TropicalWeight::Zero() : TropicalWeight::One(), weight_in};
   }
 };
+
 using LatticeArcMapper = WeightConvertMapper<StdArc, PrunedWildcardArc, LatticeConverter>;
 
 struct IntentsConverter {
   PrunedWildcardWeight operator()(const TropicalWeight &weight_in) const {
-    return {weight_in, TropicalWeight::One()};
+    return {weight_in, weight_in == TropicalWeight::Zero() ? TropicalWeight::Zero() : TropicalWeight::One()};
   }
 };
+
 using IntentsArcMapper = WeightConvertMapper<StdArc, PrunedWildcardArc, IntentsConverter>;
 
 struct WildcardToStdConverter {
   TropicalWeight operator()(const PrunedWildcardWeight &weight_in) const {
+    if (weight_in.Value1() == TropicalWeight::Zero() || weight_in.Value2() == TropicalWeight::Zero()) {
+      return TropicalWeight::Zero();
+    }
     return weight_in.Value2();
   }
 };
+
 using WildcardToStdArcMapper = WeightConvertMapper<PrunedWildcardArc, StdArc, WildcardToStdConverter>;
 
-
-template <class Arc>
-void WildcardComposePruned(
-  const Fst<Arc> &fst1,
-  const Fst<Arc> &fst2,
-  MutableFst<Arc> *ofst,
-  const int wildcard,
-  const float prune_threshold
+template<class Arc> void WildcardComposePruned(
+  const Fst<Arc> &fst1, const Fst<Arc> &fst2, MutableFst<Arc> *ofst, const int wildcard, const float prune_threshold
 ) {
+  ArcMapFst<StdArc, PrunedWildcardArc, LatticeArcMapper> mapped_lattice{fst1, LatticeArcMapper{}};
+  ArcMapFst<StdArc, PrunedWildcardArc, IntentsArcMapper> mapped_intents{fst2, IntentsArcMapper{}};
 
-    MapFst<StdArc, PrunedWildcardArc, LatticeArcMapper> mapped_lattice{fst1, LatticeArcMapper{}};
-    MapFst<StdArc, PrunedWildcardArc, IntentsArcMapper> mapped_intents{fst2, IntentsArcMapper{}};
+  using PrunedWildcardMatcher = SigmaMatcher<SortedMatcher<PrunedWildcardFst>>;
+  ComposeFstOptions<PrunedWildcardArc, PrunedWildcardMatcher> pruned_wildcard_compose_opts;
+  pruned_wildcard_compose_opts.matcher1 = new PrunedWildcardMatcher(mapped_lattice, MATCH_NONE);
+  pruned_wildcard_compose_opts.matcher2 = new PrunedWildcardMatcher(mapped_intents, MATCH_INPUT, wildcard);
 
-    using PrunedWildcardMatcher = RhoMatcher<SortedMatcher<PrunedWildcardFst>>;
-    ComposeFstOptions<PrunedWildcardArc, PrunedWildcardMatcher> pruned_wildcard_compose_opts;
-    pruned_wildcard_compose_opts.matcher1 = new PrunedWildcardMatcher(mapped_lattice, MATCH_NONE);
-    pruned_wildcard_compose_opts.matcher2 = new PrunedWildcardMatcher(mapped_intents, MATCH_INPUT, wildcard);
+  ComposeFst<PrunedWildcardArc> composed{mapped_lattice, mapped_intents, pruned_wildcard_compose_opts};
 
-    ComposeFst<PrunedWildcardArc> composed{mapped_lattice, mapped_intents, pruned_wildcard_compose_opts};
+  VectorFst<PrunedWildcardArc> pruned;
+  const PrunedWildcardWeight weight_threshold{prune_threshold, std::numeric_limits<float>::max()};
+  Prune(composed, &pruned, weight_threshold);
 
-    VectorFst<PrunedWildcardArc> pruned_composed;
-    const auto threshold = PrunedWildcardWeight{prune_threshold, std::numeric_limits<float>::max()};
-    Prune(composed, &pruned_composed, threshold);
-
-    Map(pruned_composed, ofst, WildcardToStdArcMapper{});
+  ArcMap(pruned, ofst, WildcardToStdArcMapper{});
 }
 
-template <class Arc>
-void WildcardCompose(
-  const Fst<Arc> &fst1,
-  const Fst<Arc> &fst2,
-  MutableFst<Arc> *ofst,
-  const int wildcard,
-  const float prune_threshold) {
+template<class Arc> void WildcardCompose(
+  const Fst<Arc> &fst1, const Fst<Arc> &fst2, MutableFst<Arc> *ofst, const int wildcard, const float prune_threshold
+) {
   if (prune_threshold == 0.0f) {
     WildcardComposeNonPruned(fst1, fst2, ofst, wildcard);
-  }
-  else {
+  } else {
     WildcardComposePruned(fst1, fst2, ofst, wildcard, prune_threshold);
   }
 }
-
 }
