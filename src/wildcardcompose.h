@@ -26,7 +26,6 @@ void WildcardComposeNonPruned(
   MutableFst<Arc> *ofst,
   const int wildcard
 ) {
-  //using WildcardMatcher = RhoMatcher<SortedMatcher<Fst<Arc>>>;
   using WildcardMatcher = SigmaMatcher<SortedMatcher<Fst<Arc>>>;
 
   ComposeFstOptions<Arc, WildcardMatcher> opts;
