@@ -18,8 +18,7 @@ void WildcardCompose(
   opts.filter = new SloppyFilter(
     fst1,
     fst2,
-    new WildcardMatcher(fst1, MATCH_NONE),
-    new WildcardMatcher(fst2, MATCH_INPUT, wildcard), slop_map, end_of_annotation
+    new WildcardMatcher(fst1, MATCH_NONE), new WildcardMatcher(fst2, MATCH_INPUT, wildcard), slop_map, end_of_annotation
   );
 
   *ofst = ComposeFst<Arc>(fst1, fst2, opts);

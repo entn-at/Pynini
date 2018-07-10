@@ -37,11 +37,13 @@ int main(const int argc, const char *const *const argv) {
   const auto wildcard = static_cast<ArcTpl<StdArc>::Label>(word_symbol_table->Find("<wildcard>"));
 
   SlopMap permittable_slop;
+  for (int i = 2; i != 100; ++i) { permittable_slop[i] = 10; }
   const int end_of_annotation = 1;
 
   // Prepare special matchers for composition
   StdVectorFst composed;
   WildcardCompose(*lattice, *annotator, &composed, wildcard, std::move(permittable_slop), end_of_annotation);
+  RmEpsilon(&composed);
 
   // Compose
   cout << "wildcard composed:\n";

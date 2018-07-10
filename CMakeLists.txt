@@ -9,7 +9,9 @@ link_directories(
 	${RE2_ROOT}/lib
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-unused-function -Wno-unused-local-typedef -funsigned-char -O3 -march=native")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -O3 -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-function -Wno-unused-local-typedef -funsigned-char")
 
 
 add_executable(special_compose
