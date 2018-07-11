@@ -24,10 +24,22 @@ template<class Arc> void WildcardComposeNonPruned(
 ) {
   using WildcardMatcher = SigmaMatcher<SortedMatcher<Fst<Arc>>>;
 
+  using M = typename DefaultLookAhead<Arc, MATCH_BOTH>::FstMatcher;
+  using F = typename DefaultLookAhead<Arc, MATCH_BOTH>::ComposeFilter;
+
+  using LookAhead = LookAheadMatcher<Fst<Arc>>;
+  ComposeFstOptions<Arc, M, F> opts;
+  opts.filter = new F(
+    fst1,
+    fst2,
+    new M(new WildcardMatcher(fst1, MATCH_NONE)),
+    new M(new WildcardMatcher(fst2, MATCH_INPUT, wildcard))
+  );
+  /*
   ComposeFstOptions<Arc, WildcardMatcher> opts;
   opts.matcher1 = new WildcardMatcher(fst1, MATCH_NONE);
   opts.matcher2 = new WildcardMatcher(fst2, MATCH_INPUT, wildcard);
-
+  */
   *ofst = ComposeFst<Arc>(fst1, fst2, opts);
 }
 
@@ -73,10 +85,21 @@ template<class Arc> void WildcardComposePruned(
   ArcMapFst<StdArc, PrunedWildcardArc, LatticeArcMapper> mapped_lattice{fst1, LatticeArcMapper{}};
   ArcMapFst<StdArc, PrunedWildcardArc, IntentsArcMapper> mapped_intents{fst2, IntentsArcMapper{}};
 
+  using M = typename DefaultLookAhead<PrunedWildcardArc, MATCH_BOTH>::FstMatcher;
+  using F = typename DefaultLookAhead<PrunedWildcardArc, MATCH_BOTH>::ComposeFilter;
+
+  using LookAhead = LookAheadMatcher<PrunedWildcardFst>;
   using PrunedWildcardMatcher = SigmaMatcher<SortedMatcher<PrunedWildcardFst>>;
-  ComposeFstOptions<PrunedWildcardArc, PrunedWildcardMatcher> pruned_wildcard_compose_opts;
+  ComposeFstOptions<PrunedWildcardArc, M, F> pruned_wildcard_compose_opts;
+  pruned_wildcard_compose_opts.filter = new F(
+    mapped_lattice,
+    mapped_intents,
+    new M(new PrunedWildcardMatcher(mapped_lattice, MATCH_NONE)),
+    new M(new PrunedWildcardMatcher(mapped_intents, MATCH_INPUT, wildcard))
+    );
+  /*ComposeFstOptions<PrunedWildcardArc, PrunedWildcardMatcher> pruned_wildcard_compose_opts;
   pruned_wildcard_compose_opts.matcher1 = new PrunedWildcardMatcher(mapped_lattice, MATCH_NONE);
-  pruned_wildcard_compose_opts.matcher2 = new PrunedWildcardMatcher(mapped_intents, MATCH_INPUT, wildcard);
+  pruned_wildcard_compose_opts.matcher2 = new PrunedWildcardMatcher(mapped_intents, MATCH_INPUT, wildcard);*/
 
   ComposeFst<PrunedWildcardArc> composed{mapped_lattice, mapped_intents, pruned_wildcard_compose_opts};
 
