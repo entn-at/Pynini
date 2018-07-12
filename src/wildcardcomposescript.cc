@@ -5,18 +5,23 @@
 namespace fst {
 namespace script {
 
-void WildcardCompose(const FstClass &fst1, const FstClass &fst2,
-                     MutableFstClass *ofst, const int wildcard, const float prune_threshold){
+void WildcardCompose(
+  const FstClass &fst1,
+  const FstClass &fst2,
+  MutableFstClass *ofst,
+  const int wildcard,
+  const float prune_threshold,
+  const std::vector<StringFstClassPair> &replacements
+) {
 
-  if (!internal::ArcTypesMatch(fst1, fst2, "WildcardCompose") ||
-      !internal::ArcTypesMatch(fst2, *ofst, "WildcardCompose")) {
+  if (!internal::ArcTypesMatch(fst1, fst2, "WildcardCompose")
+    || !internal::ArcTypesMatch(fst2, *ofst, "WildcardCompose")) {
     ofst->SetProperties(kError, kError);
     return;
   }
-  WildcardComposeArgs args(fst1, fst2, ofst, wildcard, prune_threshold);
+  WildcardComposeArgs args(fst1, fst2, ofst, wildcard, prune_threshold, replacements);
   Apply<Operation<WildcardComposeArgs>>("WildcardCompose", ofst->ArcType(), &args);
 }
-
 
 REGISTER_FST_OPERATION(WildcardCompose, StdArc, WildcardComposeArgs);
 //REGISTER_FST_OPERATION(WildcardCompose, LogArc, WildcardComposeArgs);

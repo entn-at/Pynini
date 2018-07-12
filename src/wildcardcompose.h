@@ -11,16 +11,26 @@
 
 namespace fst {
 
+constexpr int RootLabel = -69;
+
+template<typename Arc> using NonTerminal = std::pair<typename Arc::Label, const Fst<Arc> *>;
+
+using StdNonTerminal = NonTerminal<StdArc>;
+
 template<class Arc> void WildcardCompose(
   const Fst<Arc> &fst1,
   const Fst<Arc> &fst2,
   MutableFst<Arc> *ofst,
   const int wildcard,
-  const float prune_threshold = 0.0f
+  const float prune_threshold = 0.0f,
+  const std::vector<NonTerminal<Arc>> &replacements = {}
 );
 
 template<class Arc> void WildcardComposeNonPruned(
-  const Fst<Arc> &fst1, const Fst<Arc> &fst2, MutableFst<Arc> *ofst, const int wildcard
+  const Fst<Arc> &fst1,
+  const Fst<Arc> &fst2,
+  MutableFst<Arc> *ofst,
+  const int wildcard
 ) {
   using WildcardMatcher = SigmaMatcher<SortedMatcher<Fst<Arc>>>;
 
@@ -88,12 +98,23 @@ template<class Arc> void WildcardComposePruned(
 }
 
 template<class Arc> void WildcardCompose(
-  const Fst<Arc> &fst1, const Fst<Arc> &fst2, MutableFst<Arc> *ofst, const int wildcard, const float prune_threshold
+  const Fst<Arc> &fst1,
+  const Fst<Arc> &fst2,
+  MutableFst<Arc> *ofst,
+  const int wildcard,
+  const float prune_threshold,
+  const std::vector<NonTerminal<Arc>> &replacements
 ) {
+  std::vector<NonTerminal<Arc>> to_expand{{RootLabel, &fst2}};
+  to_expand.insert(to_expand.end(), replacements.begin(), replacements.end());
+  ReplaceFst<Arc> expanded_fst2{to_expand, RootLabel};
+
+  const Fst<Arc> *rhs_fst = replacements.empty() ? &fst2 : &expanded_fst2;
+
   if (prune_threshold == 0.0f) {
-    WildcardComposeNonPruned(fst1, fst2, ofst, wildcard);
+    WildcardComposeNonPruned(fst1, *rhs_fst, ofst, wildcard);
   } else {
-    WildcardComposePruned(fst1, fst2, ofst, wildcard, prune_threshold);
+    WildcardComposePruned(fst1, *rhs_fst, ofst, wildcard, prune_threshold);
   }
 }
 }

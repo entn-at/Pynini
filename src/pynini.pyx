@@ -161,7 +161,8 @@ from custom_ops cimport WildcardCompose
 cpdef _MutableFst wildcard_compose(_Fst ifst1,
                                    _Fst ifst2,
                                    int wildcard,
-                                   float prune_threshold = 0):
+                                   float prune_threshold = 0,
+                                   replacements = None):
   """
   wildcard_compose(ifst1, ifst2, wildcard)
 
@@ -181,9 +182,33 @@ cpdef _MutableFst wildcard_compose(_Fst ifst1,
 
   See also: `compose`.
   """
+
+  cdef vector[StringFstClassPair] pairs
+  cdef string arc_type
+  cdef Fst root_fst
+  cdef string nonterm
+  cdef Fst replacement
+
+  if replacements is not None:
+    root_fst = _compile_or_copy_Fst(ifst2)
+    arc_type = root_fst.arc_type()
+    if hasattr(replacements, "iteritems"):
+      replacements = replacements.iteritems()
+    if hasattr(replacements, "items"):
+      replacements = replacements.items()
+    # This has the pleasant effect of preventing Python from garbage-collecting
+    # these FSTs until we're ready.
+    # TODO(kbg): Is there a better way?
+    replacements = [(tostring(nt), _compile_or_copy_Fst(rep, arc_type)) for
+                    (nt, rep) in replacements]
+
+    pairs.reserve(len(replacements))
+    for (nonterm, replacement) in replacements:
+      pairs.push_back(StringFstClassPair(nonterm, replacement._fst.get()))
+
   cdef unique_ptr[VectorFstClass] tfst
   tfst.reset(new VectorFstClass(ifst1.arc_type()))
-  WildcardCompose(deref(ifst1._fst), deref(ifst2._fst), tfst.get(), wildcard, prune_threshold)
+  WildcardCompose(deref(ifst1._fst), deref(ifst2._fst), tfst.get(), wildcard, prune_threshold, pairs)
   return _init_MutableFst(tfst.release())
 
 # Python imports needed for implementation.
