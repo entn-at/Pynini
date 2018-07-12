@@ -161,21 +161,22 @@ from custom_ops cimport WildcardCompose
 cpdef _MutableFst wildcard_compose(_Fst ifst1,
                                    _Fst ifst2,
                                    int wildcard,
-                                   float prune_threshold = 0,
+                                   float prune_threshold = 0.,
                                    replacements = None):
   """
-  wildcard_compose(ifst1, ifst2, wildcard)
+  wildcard_compose(ifst1, ifst2, wildcard, prune_threshold = 0., replacements = None)
 
   Constructively composes two FSTs. 
   
   Differs from `compose` by allowing wildcards: arcs which are entered
-  when no other arcs are matched.  
+  when no other arcs are matched.
 
   Args:
     ifst1: The first input FST.
     ifst2: The second input FST.
     wildcard: The integer ID of the wildcard arc.
     prune_threshold: Float threshold for pruning - if 0, no pruning is applied.
+    replacements: An optional Dict[str, Fst] which defines symbols to be substituted in ifst2.
 
   Returns:
     An FST.
