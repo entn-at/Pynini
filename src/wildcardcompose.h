@@ -104,13 +104,15 @@ template<class Arc> void WildcardCompose(
   const auto *rhs_fst = &fst2;
 
   std::unique_ptr<ReplaceFst<Arc>> expanded_fst2;
+  std::unique_ptr<ArcSortFst<Arc, ILabelCompare<Arc>>> sorted_expanded_fst2;
   if (!replacements.empty()) {
     std::vector<NonTerminal<Arc>> to_expand{{kNoLabel, &fst2}};
     to_expand.insert(to_expand.end(), replacements.begin(), replacements.end());
     ReplaceFstOptions<Arc> opts;
     opts.call_label_type = REPLACE_LABEL_NEITHER;
     expanded_fst2.reset(new ReplaceFst<Arc>{to_expand, opts});
-    rhs_fst = expanded_fst2.get();
+    sorted_expanded_fst2.reset(new ArcSortFst<Arc, ILabelCompare<Arc>>(*expanded_fst2, {}));
+    rhs_fst = sorted_expanded_fst2.get();
   }
 
   if (prune_threshold == 0.0f) {
