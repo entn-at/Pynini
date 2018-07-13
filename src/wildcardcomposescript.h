@@ -21,7 +21,7 @@ template<class Arc> void WildcardCompose(WildcardComposeArgs *args) {
   const auto prune_threshold = std::get<4>(*args);
 
   const auto &replacements = std::get<5>(*args);
-  const auto &symbol_table = *fst2.InputSymbols();
+  const auto &symbol_table = *fst2.OutputSymbols();
   const size_t size = replacements.size();
   std::vector<NonTerminal<Arc>> typed_pairs;
   typed_pairs.reserve(size);
@@ -32,7 +32,7 @@ template<class Arc> void WildcardCompose(WildcardComposeArgs *args) {
         label, untyped_pair.second->GetFst<Arc>());
     }
     else {
-      throw std::runtime_error{"No such symbol: " + untyped_pair.first + " in the ifst2 InputSymbols()"};
+      throw std::runtime_error{"No such symbol: " + untyped_pair.first + " in the ifst2 OutputSymbols()"};
     }
   }
 

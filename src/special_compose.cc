@@ -12,14 +12,14 @@ template<typename FstType> void print(const FstType *const fst, ostream &out = c
   printer.Print(&out, "");
 }
 
-vector<NonTerminal<StdArc>> read_replacements(string path, string label, const SymbolTable &ist) {
-  vector<NonTerminal<StdArc>> replacements;
-  if (path.empty()) {
-    return replacements;
+vector<NonTerminal<StdArc>> read_replacements(const char *path, const char *label, const SymbolTable *ist) {
+  if (!path || !label || !ist) {
+    return {};
   }
 
-  const auto label_id = ist.Find(label);
-  replacements.push_back(make_pair(label_id, Fst<StdArc>::Read(path)));
+  vector<NonTerminal<StdArc>> replacements;
+  const auto label_id = ist->Find(label);
+  replacements.emplace_back(label_id, Fst<StdArc>::Read(path));
   return replacements;
 }
 
@@ -53,7 +53,7 @@ int main(const int argc, const char *const *const argv) {
 
   const auto wildcard = static_cast<ArcTpl<StdArc>::Label>(word_symbol_table->Find("<wildcard>"));
 
-  const auto replacements = read_replacements(replacement_path, replacement_label, *annotation_symbol_table);
+  const auto replacements = read_replacements(replacement_path, replacement_label, annotation_symbol_table);
 
   // Prepare special matchers for composition
   StdVectorFst composed;

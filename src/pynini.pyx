@@ -162,7 +162,7 @@ cpdef _MutableFst wildcard_compose(_Fst ifst1,
                                    _Fst ifst2,
                                    int wildcard,
                                    float prune_threshold = 0.,
-                                   replacements = None):
+                                   dict replacements = None):
   """
   wildcard_compose(ifst1, ifst2, wildcard, prune_threshold = 0., replacements = None)
 
@@ -187,25 +187,20 @@ cpdef _MutableFst wildcard_compose(_Fst ifst1,
   cdef vector[StringFstClassPair] pairs
   cdef string arc_type
   cdef Fst root_fst
-  cdef string nonterm
+  cdef str nonterm
   cdef Fst replacement
 
   if replacements is not None:
-    root_fst = _compile_or_copy_Fst(ifst2)
+    root_fst = ifst2  # _compile_or_copy_Fst(ifst2)
     arc_type = root_fst.arc_type()
-    if hasattr(replacements, "iteritems"):
-      replacements = replacements.iteritems()
-    if hasattr(replacements, "items"):
-      replacements = replacements.items()
     # This has the pleasant effect of preventing Python from garbage-collecting
     # these FSTs until we're ready.
-    # TODO(kbg): Is there a better way?
-    replacements = [(tostring(nt), _compile_or_copy_Fst(rep, arc_type)) for
-                    (nt, rep) in replacements]
+    # replacements = [(tostring(nt), _compile_or_copy_Fst(rep, arc_type)) for
+    #                 (nt, rep) in replacements]
 
     pairs.reserve(len(replacements))
-    for (nonterm, replacement) in replacements:
-      pairs.push_back(StringFstClassPair(nonterm, replacement._fst.get()))
+    for (nonterm, replacement) in replacements.items():
+      pairs.push_back(StringFstClassPair(tostring(nonterm), replacement._fst.get()))
 
   cdef unique_ptr[VectorFstClass] tfst
   tfst.reset(new VectorFstClass(ifst1.arc_type()))
