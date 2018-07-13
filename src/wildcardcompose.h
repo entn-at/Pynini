@@ -8,10 +8,9 @@
 #include <fst/matcher.h>
 #include <fst/prune.h>
 #include <fst/fstlib.h>
+#include <fst/script/print-impl.h>
 
 namespace fst {
-
-constexpr int RootLabel = -69;
 
 template<typename Arc> using NonTerminal = std::pair<typename Arc::Label, const Fst<Arc> *>;
 
@@ -27,10 +26,7 @@ template<class Arc> void WildcardCompose(
 );
 
 template<class Arc> void WildcardComposeNonPruned(
-  const Fst<Arc> &fst1,
-  const Fst<Arc> &fst2,
-  MutableFst<Arc> *ofst,
-  const int wildcard
+  const Fst<Arc> &fst1, const Fst<Arc> &fst2, MutableFst<Arc> *ofst, const int wildcard
 ) {
   using WildcardMatcher = SigmaMatcher<SortedMatcher<Fst<Arc>>>;
 
@@ -58,13 +54,13 @@ struct LatticeConverter {
 
 using LatticeArcMapper = WeightConvertMapper<StdArc, PrunedWildcardArc, LatticeConverter>;
 
-struct IntentsConverter {
+struct AnnotationsConverter {
   PrunedWildcardWeight operator()(const TropicalWeight &weight_in) const {
     return {weight_in, weight_in == TropicalWeight::Zero() ? TropicalWeight::Zero() : TropicalWeight::One()};
   }
 };
 
-using IntentsArcMapper = WeightConvertMapper<StdArc, PrunedWildcardArc, IntentsConverter>;
+using AnnotationsArcMapper = WeightConvertMapper<StdArc, PrunedWildcardArc, AnnotationsConverter>;
 
 struct WildcardToStdConverter {
   TropicalWeight operator()(const PrunedWildcardWeight &weight_in) const {
@@ -80,15 +76,15 @@ using WildcardToStdArcMapper = WeightConvertMapper<PrunedWildcardArc, StdArc, Wi
 template<class Arc> void WildcardComposePruned(
   const Fst<Arc> &fst1, const Fst<Arc> &fst2, MutableFst<Arc> *ofst, const int wildcard, const float prune_threshold
 ) {
-  ArcMapFst<StdArc, PrunedWildcardArc, LatticeArcMapper> mapped_lattice{fst1, LatticeArcMapper{}};
-  ArcMapFst<StdArc, PrunedWildcardArc, IntentsArcMapper> mapped_intents{fst2, IntentsArcMapper{}};
+  ArcMapFst<StdArc, PrunedWildcardArc, LatticeArcMapper> mapped_fst1{fst1, LatticeArcMapper{}};
+  ArcMapFst<StdArc, PrunedWildcardArc, AnnotationsArcMapper> mapped_fst2{fst2, AnnotationsArcMapper{}};
 
   using PrunedWildcardMatcher = SigmaMatcher<SortedMatcher<PrunedWildcardFst>>;
   ComposeFstOptions<PrunedWildcardArc, PrunedWildcardMatcher> pruned_wildcard_compose_opts;
-  pruned_wildcard_compose_opts.matcher1 = new PrunedWildcardMatcher(mapped_lattice, MATCH_NONE);
-  pruned_wildcard_compose_opts.matcher2 = new PrunedWildcardMatcher(mapped_intents, MATCH_INPUT, wildcard);
+  pruned_wildcard_compose_opts.matcher1 = new PrunedWildcardMatcher(mapped_fst1, MATCH_NONE);
+  pruned_wildcard_compose_opts.matcher2 = new PrunedWildcardMatcher(mapped_fst2, MATCH_INPUT, wildcard);
 
-  ComposeFst<PrunedWildcardArc> composed{mapped_lattice, mapped_intents, pruned_wildcard_compose_opts};
+  ComposeFst<PrunedWildcardArc> composed{mapped_fst1, mapped_fst2, pruned_wildcard_compose_opts};
 
   VectorFst<PrunedWildcardArc> pruned;
   const PrunedWildcardWeight weight_threshold{prune_threshold, std::numeric_limits<float>::max()};
@@ -105,11 +101,11 @@ template<class Arc> void WildcardCompose(
   const float prune_threshold,
   const std::vector<NonTerminal<Arc>> &replacements
 ) {
-  std::vector<NonTerminal<Arc>> to_expand{{RootLabel, &fst2}};
+  std::vector<NonTerminal<Arc>> to_expand{{kNoLabel, &fst2}};
   to_expand.insert(to_expand.end(), replacements.begin(), replacements.end());
-  ReplaceFst<Arc> expanded_fst2{to_expand, RootLabel};
+  ReplaceFst<Arc> expanded_fst2{to_expand, ReplaceFstOptions<Arc>{}};
 
-  const Fst<Arc> *rhs_fst = replacements.empty() ? &fst2 : &expanded_fst2;
+  const auto *const rhs_fst = replacements.empty() ? &fst2 : &expanded_fst2;
 
   if (prune_threshold == 0.0f) {
     WildcardComposeNonPruned(fst1, *rhs_fst, ofst, wildcard);
