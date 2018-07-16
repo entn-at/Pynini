@@ -25,7 +25,7 @@ add_executable(special_compose
 	src/wildcardcompose.h
 	src/wildcardcomposescript.h
 	src/wildcardcomposescript.cc
-	src/special_arcs.cc)
+	src/special_arcs.cc src/pynini_constfst.cc src/pynini_constfst.h)
 target_link_libraries(special_compose
 	re2
 	fstfarscript

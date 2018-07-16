@@ -90,6 +90,7 @@ from pywrapfst cimport _get_compose_filter
 from pywrapfst cimport _get_queue_type
 from pywrapfst cimport _get_replace_label_type
 from pywrapfst cimport _init_MutableFst
+from pywrapfst cimport _init_Fst
 from pywrapfst cimport _init_SymbolTable
 from pywrapfst cimport tostring
 
@@ -157,6 +158,7 @@ from pynini_includes cimport PdtParserType
 # Custom extensions of Pynini
 
 from custom_ops cimport WildcardCompose
+from custom_ops cimport ToConstFst
 
 cpdef _MutableFst wildcard_compose(_Fst ifst1,
                                    _Fst ifst2,
@@ -206,6 +208,21 @@ cpdef _MutableFst wildcard_compose(_Fst ifst1,
   tfst.reset(new VectorFstClass(ifst1.arc_type()))
   WildcardCompose(deref(ifst1._fst), deref(ifst2._fst), tfst.get(), wildcard, prune_threshold, pairs)
   return _init_MutableFst(tfst.release())
+
+
+cpdef to_const_fst(_Fst ifst):
+  """
+  to_const_fst(ifst) -> Fst
+
+  Constructs a new immutable FST of type ConstFst which is a copy of the input (mutable) Fst.
+  """
+  cdef unique_ptr[FstClass] tfst
+  # Since the default constructor does not work, first copy existing fst,
+  # then overide the copy with an FstClass containing a ConstFst
+  tfst.reset(new FstClass(deref(ifst._fst)))
+  ToConstFst(deref(ifst._fst), tfst.get())
+  return _init_Fst(tfst.release())
+
 
 # Python imports needed for implementation.
 

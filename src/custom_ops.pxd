@@ -12,3 +12,8 @@ cdef extern from "wildcardcomposescript.h" \
 
     void WildcardCompose(const FstClass &, const FstClass &,
                          MutableFstClass *, const int wildcard, float prune_threshold, const vector[StringFstClassPair] &replacements)
+
+cdef extern from "pynini_constfst.h" \
+    namespace "fst::script" nogil:
+
+    void ToConstFst(const FstClass &ifst_class, FstClass *ofst_class)
