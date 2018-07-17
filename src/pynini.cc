@@ -15732,7 +15732,7 @@ static PyObject *__pyx_pf_6pynini_34_wildcard_compose_patch(CYTHON_UNUSED PyObje
  *     return lhs
  *   return patch             # <<<<<<<<<<<<<<
  * 
- * wildcard_compose = _compose_patch(wildcard_compose)
+ * wildcard_compose = _wildcard_compose_patch(wildcard_compose)
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_patch);
@@ -37937,11 +37937,11 @@ if (!__Pyx_RefNanny) {
   /* "pynini.pyx":1453
  *   return patch
  * 
- * wildcard_compose = _compose_patch(wildcard_compose)             # <<<<<<<<<<<<<<
+ * wildcard_compose = _wildcard_compose_patch(wildcard_compose)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_compose_patch); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1453, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_wildcard_compose_patch); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1453, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_wildcard_compose); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1453, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);

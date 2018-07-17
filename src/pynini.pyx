@@ -1450,7 +1450,7 @@ def _wildcard_compose_patch(fnc):
     return lhs
   return patch
 
-wildcard_compose = _compose_patch(wildcard_compose)
+wildcard_compose = _wildcard_compose_patch(wildcard_compose)
 
 
 def _difference_patch(fnc):
