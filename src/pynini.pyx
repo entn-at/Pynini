@@ -1443,6 +1443,13 @@ def _compose_patch(fnc):
 
 compose = _compose_patch(pywrapfst.compose)
 
+def _wildcard_compose_patch(fnc):
+  @functools.wraps(fnc)
+  def patch(arg1, arg2, *args, **kwargs):
+    lhs = _init_Fst_from_MutableFst(fnc(arg1, arg2, *args, **kwargs))
+    return lhs
+  return patch
+
 wildcard_compose = _compose_patch(wildcard_compose)
 
 
